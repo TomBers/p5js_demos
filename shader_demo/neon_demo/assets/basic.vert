@@ -1,10 +1,10 @@
 attribute vec3 aPosition;
 attribute vec2 aTexCoord;
 
-varying vec2 pos;
+varying vec2 fragCoord;
 
 void main() {
-  pos = aTexCoord;
+  fragCoord = aTexCoord;
 
   vec4 position = vec4(aPosition, 1.0);
   // Make sure we draw the whole screen (values are normailzed 0 -> 1)

@@ -1,100 +1,108 @@
 precision mediump float;
 
 // Set in the vertex shader and passed in (aTexCoord)
-varying vec2 pos;
+varying vec2 fragCoord;
 uniform float millis;
 
-void main() {
+vec3 palette_preset(float t) {
+  vec3 a = vec3(0.5);
+  vec3 b = vec3(0.5);
+  vec3 c = vec3(1.0);
+  vec3 d = vec3(0.263, 0.416, 0.557);
 
-  vec4 tl = vec4(.5, .1, .9, 1.);
-  vec4 tr = vec4(.3, 1., .8, 1.);
-
-  vec4 bl = vec4(.8, .6, .1, 1.);
-  vec4 br = vec4(.7, .1, .2, 1.);
-
-  vec4 top = mix(tl, tr, pos.y);
-  vec4 bottom = mix(bl, br, pos.y);
-
-  gl_FragColor = mix(top, bottom, pos.x);
+  return a + b * cos(6.28318 * (c * t + d));
 }
 
-// SDF Circle
-// *************
-// const int NUM_CIRCLES = 200;
-// uniform vec3 circles[NUM_CIRCLES];
+vec3 palette(float t, vec3 a, vec3 b, vec3 c, vec3 d) {
+  return a + b * cos(6.28318 * (c * t + d));
+}
 
-// void main() {
+void main() {
+  vec2 uv = (fragCoord.xy - 0.5) * 2.0;
+  vec2 uv0 = uv;
 
-//   float colour = 1.;
+  vec3 finalColor = vec3(0.0);
 
-//   for(int i = 0; i < NUM_CIRCLES; i++) {
-//     vec3 circle = circles[i];
+  for(float i = 0.; i < 3.; i++) {
+    uv = fract(uv * 1.5) - 0.5;
 
-//     // Distance from the current pixel to the center of the circle
-//     float d = length(pos - circle.xy) - circle.z;
+    float d = length(uv) * exp(-length(uv0));
+    float t = millis / 2000.;
 
-// // Set to 0 if the pixel is outside the circle
-// // When distance is negative, the pixel is inside the circle and we set to 0 else d
-//     d = step(0., d);
+    vec3 col = palette_preset(length(uv0) + (i * 0.4) + t);
 
-// // Colour out side of the circle is 1. (white) and inside is 0. (black)
-//     colour *= d;
-//   }
+    d = sin(d * 8. + t) / 8.;
+    d = abs(d);
 
-//   gl_FragColor = vec4(colour, colour, colour, 1.0);
+    d = pow(.01 / d, 1.2);
+
+    finalColor += col * d;
+  }
+
+  gl_FragColor = vec4(finalColor, 1.0);
+}
+
+// Brilliant Neon
+// **************
+// vec3 palette_preset(float t) {
+//   vec3 a = vec3(0.5);
+//   vec3 b = vec3(0.5);
+//   vec3 c = vec3(1.0);
+//   vec3 d = vec3(0.263, 0.416, 0.557);
+
+//   return a + b * cos(6.28318 * (c * t + d));
 // }
 
-// Gray Scale
-// *************
+// vec3 palette(float t, vec3 a, vec3 b, vec3 c, vec3 d) {
+//   return a + b * cos(6.28318 * (c * t + d));
+// }
 
-// vec2 newPos = pos;
-// newPos.y = 1. - newPos.y;
-// newPos = newPos + (sin(pos.x * 16. + millis / 100.) + 1.) / 2. * .1;
-// vec4 col = texture2D(background, newPos);
-// float avg = (col.r + col.g + col.b) / 3.;
-// gl_FragColor = vec4(avg, avg, avg, 1.);
+// void main() {
+//   vec2 uv = (fragCoord.xy - 0.5) * 2.0;
 
-// Wavey Image
-// *************
-// vec2 newPos = pos;
-// newPos.y = 1. - newPos.y;
+//   float d = length(uv);
+//   float t = millis / 1000.;
 
-// newPos = newPos + (sin(pos.x * 16. + millis / 100.) + 1.) / 2. * .1;
+//   vec3 col = palette_preset(d + t);
 
-// vec4 col = texture2D(background, newPos);
-// gl_FragColor = vec4(col);
+//   d = sin(d * 8. + t) / 8.;
+//   d = abs(d);
 
-// Draw Image from Texture (correct for upside down)
-// *************
-// vec2 newPos = pos;
-// newPos.y = 1. - newPos.y;
-// vec4 col = texture2D(background, newPos);
-// gl_FragColor = vec4(col);
+//   d = .02 / d;
 
-// Moving Sin Wave
-// *************
-// float c = (sin(pos.x * 16. + millis / 100.) + 1.) / 2.;
-// gl_FragColor = vec4(c, 0., 1., 1.);
+//   col *= d;
 
-// Sin Wave
-// *************
-// float c = sin(pos.x * 16.) + 1. / 2.;
-// gl_FragColor = vec4(c, 0., 1., 1.);
+//   gl_FragColor = vec4(col, 1.0);
+// }
 
-// Grad copied 10 times
-// *************
-// vec2 newPos = fract(pos * 10.);
-// gl_FragColor = vec4(newPos, 1., 1.);
+// Intense Blue Neon
+// **************
 
-// Pretty Circle
-// *************
-// vec4 tl = vec4(.5, .1, .9, 1.);
-// vec4 tr = vec4(.3, 1., .8, 1.);
+// void main() {
+//   vec2 uv = (fragCoord.xy - 0.5) * 2.0;
+//   float d = length(uv);
 
-// vec4 bl = vec4(.8, .6, .1, 1.);
-// vec4 br = vec4(.7, .1, .2, 1.);
+//   vec3 col = vec3(1.0, 2.0, 3.0);
 
-// vec4 top = mix(tl, tr, pos.y);
-// vec4 bottom = mix(bl, br, pos.y);
+//   d = sin(d * 8. + millis / 1000.) / 8.;
+//   d = abs(d);
 
-// gl_FragColor = mix(top, bottom, pos.x);
+//   d = .02 / d;
+
+//   col *= d;
+
+//   gl_FragColor = vec4(col, 1.0);
+// }
+
+// Pleasant Glow
+// **************
+// void main() {
+//   vec2 uv = (fragCoord.xy - 0.5) * 2.0;
+//   float d = length(uv);
+//   d = sin(d * 8. + millis / 1000.) / 8.;
+//   d = abs(d);
+
+//   d = .02 / d;
+
+//   gl_FragColor = vec4(d, d, d, 1.0);
+// }
