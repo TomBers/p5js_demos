@@ -14,7 +14,7 @@ function preload() {
 function setup() {
   // shaders require WEBGL mode to work
 
-  createCanvas(1000, 1000, WEBGL);
+  createCanvas(500, 500, WEBGL);
   shader(theShader);
 
 
